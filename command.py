@@ -110,7 +110,7 @@ def get_contacts(wf, hub, aliases):
     """
     return hub.get_contacts(aliases)
 
-def handle_commands(wf, hub, args, commands):
+def handle_commands(wf, hub, args):
     if not args.command_type or not args.id or not args.command:
         return 
     call = args.command_type+'_'+args.command
@@ -247,75 +247,6 @@ def main(wf):
     args = parser.parse_args(wf.args)
     log.debug("args are "+str(args))
 
-    # list of commands
-    commands =  {
-        'client':     {
-                            'reconnect': {
-                                    'arguments': {
-                                        'mac': lambda: args.mac
-                                    }
-                            }, 
-                            'block': {
-                                    'arguments': {
-                                        'mac': lambda: args.mac
-                                    }
-                            },
-                            'unblock': {
-                                    'arguments': {
-                                        'mac': lambda: args.mac
-                                    }
-                            }
-                        },
-        'device':     {
-                            'reboot': {
-                                    'arguments': {
-                                        'mac': lambda: args.mac
-                                    }
-                            }, 
-                            'upgrade': {
-                                    'arguments': {
-                                        'mac': lambda: args.mac
-                                    }
-                            }, 
-                        },
-        'radius':     {
-                            'delete': {
-                                    'arguments': {
-                                        'mac': lambda: args.id
-                                    }
-                            }, 
-                        },
-        'fwrule':     {
-                            'enable': {
-                                    'cmd' : 'fwenable',
-                                    'arguments': {
-                                        'ruleid': lambda: args.id
-                                    }
-                            }, 
-                            'disable': {
-                                    'cmd' : 'fwdisable',
-                                    'arguments': {
-                                        'ruleid': lambda: args.id
-                                    }
-                            }, 
-                        },
-        'portfwd':     {
-                            'enable': {
-                                    'cmd' : 'pfenable',
-                                    'arguments': {
-                                        'ruleid': lambda: args.id
-                                    }
-                            }, 
-                            'disable': {
-                                    'cmd' : 'pfdisable',
-                                    'arguments': {
-                                        'ruleid': lambda: args.id
-                                    }
-                            }, 
-                        },
-
-    }
-
     if(not handle_config_commands(wf, args)):
         hub = get_hub(wf)
         # handle any cache updates
@@ -323,7 +254,7 @@ def main(wf):
         # handle copy to clipboard
         if not handle_copy_command(wf, args):
             # handle any client or device commands there may be
-            handle_commands(wf, hub, args, commands)
+            handle_commands(wf, hub, args)
     return 0
 
 

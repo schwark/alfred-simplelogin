@@ -28,14 +28,14 @@ def copy_to_clipboard(text):
 def get_notify_name(wf, args):
     type = args['command_type'] 
     #log.debug('type in notify is '+type)
-    idkey = '_id'
+    idkey = 'id'
     name = ''
     if not args[idkey]: return name
     items = wf.cached_data(type, max_age=0)
     #log.debug('items in notify is '+str(items))
     if items:
-        item = next((x for x in items if args[idkey] == x[idkey]), None)
-        name = item['name'] if 'name' in item else item['hostname']
+        item = next((x for x in items if str(args[idkey]) == str(x[idkey])), None)
+        name = item['email'] if 'email' in item else (item['contact'] if 'contact' in item else 'item')
         name = ' '.join(map(lambda x: x.capitalize(), re.split('[\.\s\-\,]+', name)))
     return name
 
@@ -111,10 +111,10 @@ def get_contacts(wf, hub, aliases):
     return hub.get_contacts(aliases)
 
 def handle_commands(wf, hub, args, commands):
-    if not args.command_type or not args._id or not args.command:
+    if not args.command_type or not args.id or not args.command:
         return 
     call = args.command_type+'_'+args.command
-    result = hub.call_dynamic(call, id=args._id)
+    result = hub.call_dynamic(call, id=args.id)
         
     log.debug("type of result is "+str(type(result))+" and result is "+str(result))
     notify_command = re.sub(r'^(fw|pf)', '', args.command)
@@ -239,7 +239,7 @@ def main(wf):
     parser.add_argument('--command-type', dest='command_type', default='alias')
     parser.add_argument('--command-params', dest='command_params', nargs='*', default=[])
 
-    parser.add_argument('--id', dest='_id', default=None)
+    parser.add_argument('--id', dest='id', default=None)
 
     # add an optional query and save it to 'query'
     parser.add_argument('query', nargs='?', default=None)
@@ -281,7 +281,7 @@ def main(wf):
         'radius':     {
                             'delete': {
                                     'arguments': {
-                                        'mac': lambda: args._id
+                                        'mac': lambda: args.id
                                     }
                             }, 
                         },
@@ -289,13 +289,13 @@ def main(wf):
                             'enable': {
                                     'cmd' : 'fwenable',
                                     'arguments': {
-                                        'ruleid': lambda: args._id
+                                        'ruleid': lambda: args.id
                                     }
                             }, 
                             'disable': {
                                     'cmd' : 'fwdisable',
                                     'arguments': {
-                                        'ruleid': lambda: args._id
+                                        'ruleid': lambda: args.id
                                     }
                             }, 
                         },
@@ -303,13 +303,13 @@ def main(wf):
                             'enable': {
                                     'cmd' : 'pfenable',
                                     'arguments': {
-                                        'ruleid': lambda: args._id
+                                        'ruleid': lambda: args.id
                                     }
                             }, 
                             'disable': {
                                     'cmd' : 'pfdisable',
                                     'arguments': {
-                                        'ruleid': lambda: args._id
+                                        'ruleid': lambda: args.id
                                     }
                             }, 
                         },

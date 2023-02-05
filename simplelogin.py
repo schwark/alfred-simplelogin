@@ -48,7 +48,7 @@ class SimpleLogin(object):
             },
             'alias-toggle': {
                 'method': 'POST',
-                'url': lambda sf, **kwargs: ' /api/aliases/'+str(kwargs['id'] if 'id' in kwargs else '')+'/toggle',
+                'url': lambda sf, **kwargs: '/api/aliases/'+str(kwargs['id'] if 'id' in kwargs else '')+'/toggle',
             },
             'alias-details': {
                 'url': lambda sf, **kwargs: '/api/aliases/'+str(kwargs['id'] if 'id' in kwargs else '')
@@ -75,7 +75,7 @@ class SimpleLogin(object):
             },
             'contact-toggle': {
                 'method': 'POST',
-                'url': lambda sf, **kwargs: ' /api/contacts/'+str(kwargs['id'] if 'id' in kwargs else '')+'/toggle',
+                'url': lambda sf, **kwargs: '/api/contacts/'+str(kwargs['id'] if 'id' in kwargs else '')+'/toggle',
             },
         },
     }

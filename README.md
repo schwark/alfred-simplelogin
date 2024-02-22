@@ -1,4 +1,4 @@
-# alfred-unifi
+# alfred-simplelogin
 Alfred  Workflow for interacting with SimpleLogin
 
 ## Install
@@ -24,7 +24,12 @@ This should only be needed once per install or after a reinit - stored securely 
 ```
 sl update
 ```
-This should be needed once at the install, and everytime you want to refresh information on devices/clients - should happen automatically at least once a month - this takes quite a while to complete - upto 5-10 minutes depending on the number of contacts
+This should be needed once at the install, and everytime you want to refresh information on aliases, domains and mailboxes - should happen automatically at least once a month - this takes quite a while to complete - upto 1-2 minutes depending on the number of contacts
+
+```
+sl exupdate
+```
+This should be needed once at the install, and everytime you want to refresh information on contacts as well as aliases, domains and mailboxes - this takes a very long while to complete - upto 5-10 minutes depending on the number of contacts
 
 ## Alias Commands
 

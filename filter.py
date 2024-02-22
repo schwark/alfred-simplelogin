@@ -227,8 +227,15 @@ def main(wf):
             'command': 'clip',
             'params': ['email']
         },
+        'contact': {
+            'command': 'contact_new',
+            'params': ['contact']
+        },
         'toggle': {
                 'command': 'toggle'
+        },
+        'update': {
+                'command': 'upcontact'
         },
         'enable': {
                 'command': 'enable'
@@ -266,16 +273,20 @@ def main(wf):
         },
     }
 
-    command_params = {
-        'clients': {'dummy':'dummy'}
-    }
-
     config_commands = {
         'update': {
             'title': 'Update aliases, domains and mailboxes',
             'subtitle': 'Update the aliases, domains and mailboxes',
             'autocomplete': 'update',
             'args': ' --update',
+            'icon': ICON_SYNC,
+            'valid': True
+        },
+        'exupdate': {
+            'title': 'Extended update including contacts',
+            'subtitle': 'Extended update of everything including contacts',
+            'autocomplete': 'exupdate',
+            'args': ' --exupdate',
             'icon': ICON_SYNC,
             'valid': True
         },
@@ -336,6 +347,13 @@ def main(wf):
         # Add a notification if the script is running
         wf.add_item('Updating aliases, mailboxes and domains...', icon=ICON_INFO)
     # If script was passed a query, use it to filter posts
+    elif is_running('exupdate'):
+        # Tell Alfred to run the script again every 0.5 seconds
+        # until the `update` job is complete (and Alfred is
+        # showing results based on the newly-retrieved data)
+        wf.rerun = 0.5
+        # Add a notification if the script is running
+        wf.add_item('Updating contacts, aliases, mailboxes and domains...', icon=ICON_INFO)
     elif query:
         # retrieve cached clients and devices
         aliases = wf.cached_data('alias', max_age=0)
@@ -402,11 +420,14 @@ def main(wf):
                     cmd_list = list(filter(lambda x: x.startswith(command), item['commands'].keys())) if (not command or command not in item['commands']) else [command]
                     log.debug('parts.'+single['_type']+'_command is '+command)
                     for command in cmd_list:
+                        param_str = str(' '.join(list(map(lambda x: single[x], item['commands'][command]['params'])))) if 'params' in item['commands'][command] else ''
+                        if not param_str:
+                            param_str = params if params else ''
                         wf.add_item(title=name,
                                 subtitle=command.capitalize()+' '+name,
-                                arg=' --'+item['id']+' "'+str(single[item['id']])+'" --command-type '+single['_type']+' --command '+command+' --command-params "'+(str(' '.join(list(map(lambda x: single[x], item['commands'][command]['params'])))) if 'params' in item['commands'][command] else '')+'"',
+                                arg=' --'+item['id']+' "'+str(single[item['id']])+'" --command-type '+single['_type']+' --command '+command+' --command-params "'+(param_str)+'"',
                                 autocomplete=name+' '+command,
-                                valid=bool('arguments' not in item['commands'][command] or params),
+                                valid=bool('arguments' not in item['commands'][command] or param_str),
                                 icon=single['_icon'])
                 # Loop through the returned clients and add an item for each to
                 # the list of results for Alfred

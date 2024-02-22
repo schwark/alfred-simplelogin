@@ -229,6 +229,12 @@ class SimpleLogin(object):
     def alias_toggle(self, id):
         return self._get_results('alias-toggle', id=id)
         
+    def alias_contact_new(self, id, contact):
+        return self._get_results('alias-contact-new', id=id, contact=contact)
+        
+    def alias_upcontact(self, id):
+        return self._get_results('alias-contacts', id=id)
+        
     def alias_enable(self, id):
         result = False
         alias = self.get_alias(id)

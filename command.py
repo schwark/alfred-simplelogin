@@ -110,6 +110,13 @@ def get_contacts(wf, hub, aliases):
     """
     return hub.get_contacts(aliases)
 
+
+def post_process(wf, hub, args, result):
+    if not args.command_type or not args.id or not args.command:
+        return 
+    call = args.command_type+'_'+args.command
+    
+
 def handle_commands(wf, hub, args):
     if not args.command_type or not args.id or not args.command:
         return 
@@ -163,26 +170,26 @@ def post_process_item(wf, item):
 
 def handle_update(wf, args, hub):
     # Update clients if that is passed in
-    if args.update:  
+    if args.update or args.exupdate:  
         # update clients and devices
         aliases = list(map(lambda x: post_process_item(wf, x), get_aliases(wf, hub)))
         domains = list(map(lambda x: post_process_item(wf, x), get_domains(wf, hub)))
         mailboxes = list(map(lambda x: post_process_item(wf, x), get_mailboxes(wf, hub)))
-        contacts = list(map(lambda x: post_process_item(wf, x), get_contacts(wf, hub, aliases)))
         if aliases:
             wf.cache_data('alias', aliases)
         if domains:
             wf.cache_data('domain', domains)
         if mailboxes:
             wf.cache_data('mailbox', mailboxes)
-        if contacts:
-            wf.cache_data('contact', contacts)
         if aliases:
             qnotify('SimpleLogin', 'aliases and domains updated')
         else:
             qnotify('SimpleLogin', 'aliases and domains update failed')
+    if args.exupdate:
+        contacts = list(map(lambda x: post_process_item(wf, x), get_contacts(wf, hub, aliases)))
+        if contacts:
+            wf.cache_data('contact', contacts)        
         return True # 0 means script exited cleanly
-
 
 def handle_config_commands(wf, args):
     result = False
@@ -232,6 +239,7 @@ def main(wf):
     # value to 'apikey' (dest). This will be called from a separate "Run Script"
     # action with the API key
     parser.add_argument('--update', dest='update', action='store_true', default=False)
+    parser.add_argument('--exupdate', dest='exupdate', action='store_true', default=False)
     # reinitialize 
     parser.add_argument('--reinit', dest='reinit', action='store_true', default=False)
     # client name, mac, command and any command params

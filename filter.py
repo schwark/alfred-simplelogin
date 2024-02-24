@@ -420,12 +420,12 @@ def main(wf):
                     cmd_list = list(filter(lambda x: x.startswith(command), item['commands'].keys())) if (not command or command not in item['commands']) else [command]
                     log.debug('parts.'+single['_type']+'_command is '+command)
                     for command in cmd_list:
-                        param_str = str(' '.join(list(map(lambda x: single[x], item['commands'][command]['params'])))) if 'params' in item['commands'][command] else ''
+                        param_str = str(' '.join(list(map(lambda x: single[x] if x in single else '', item['commands'][command]['params'])))) if command in item['commands'] and 'params' in item['commands'][command] else ''
                         if not param_str:
                             param_str = params if params else ''
                         wf.add_item(title=name,
                                 subtitle=command.capitalize()+' '+name,
-                                arg=' --'+item['id']+' "'+str(single[item['id']])+'" --command-type '+single['_type']+' --command '+command+' --command-params "'+(param_str)+'"',
+                                arg=' --'+item['id']+' "'+str(single[item['id']])+'" --command-type '+single['_type']+' --command '+command+' --command-params "'+str(param_str)+'"',
                                 autocomplete=name+' '+command,
                                 valid=bool('arguments' not in item['commands'][command] or param_str),
                                 icon=single['_icon'])

@@ -396,7 +396,7 @@ def main(wf):
         total_results = 0
         
         for item in items:
-            item['list'] = list(filter(lambda x: x, item['list']))
+            item['list'] = list(filter(lambda x: x, item['list'] if item['list'] else []))
             parts = extract_commands(wf, args, item['list'], item['filter'], item['commands'])
             query = parts['query']
             item_list = get_filtered_items(wf, query, item['list'], item['filter'])

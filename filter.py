@@ -420,14 +420,16 @@ def main(wf):
                     cmd_list = list(filter(lambda x: x.startswith(command), item['commands'].keys())) if (not command or command not in item['commands']) else [command]
                     log.debug('parts.'+single['_type']+'_command is '+command)
                     for command in cmd_list:
-                        param_str = str(' '.join(list(map(lambda x: single[x] if x in single else '', item['commands'][command]['params'])))) if command in item['commands'] and 'params' in item['commands'][command] else ''
+                        param_str = list(filter(lambda x: x, map(lambda x: single[x] if x in single else '', item['commands'][command]['params']))) if command in item['commands'] and 'params' in item['commands'][command] else []
                         if not param_str:
-                            param_str = params if params else ''
+                            log.debug(single)
+                            param_str = list(filter(lambda x: ('email' not in single or single['email'] not in x) and ('contact' not in single or single['contact'] not in x), params)) if params else ''
+                            log.debug("param_str is : "+str(param_str))
                         wf.add_item(title=name,
                                 subtitle=command.capitalize()+' '+name,
-                                arg=' --'+item['id']+' "'+str(single[item['id']])+'" --command-type '+single['_type']+' --command '+command+' --command-params "'+str(param_str)+'"',
+                                arg=' --'+item['id']+' "'+str(single[item['id']])+'" --command-type '+single['_type']+' --command '+item['commands'][command]['command']+(' --command-params "'+(','.join(param_str))+'"' if param_str else ''),
                                 autocomplete=name+' '+command,
-                                valid=bool('arguments' not in item['commands'][command] or param_str),
+                                valid=bool('params' not in item['commands'][command] or len(param_str) >= len(item['commands'][command]['params'])),
                                 icon=single['_icon'])
                 # Loop through the returned clients and add an item for each to
                 # the list of results for Alfred

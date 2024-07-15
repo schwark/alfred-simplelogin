@@ -14,6 +14,29 @@ from common import get_email_domain
 
 log = None
 
+
+def alias_contact_new(result, wf, id):
+    if result and "reverse_alias" in result:
+        copy_to_clipboard(result['reverse_alias'])
+        return result['reverse_alias']+" in clipboard"
+    return None
+
+def update_contacts(fresh, wf):
+    stored = wf.cached_data('contact', max_age=0)
+    ids = list(map(lambda x: x['id'], fresh))
+    stored = list(filter(lambda x: x['id'] not in ids, stored)) if ids else stored
+    stored.extend(fresh)      
+    wf.cache_data('contact', stored)        
+
+def alias_upcontact(result, wf, id):
+    if result:
+        one = get_alias(wf, int(id))
+        name = one['email'] if one else 'Unknown Alias'
+        contacts = list(map(lambda x: post_process_item(wf, x, name), result))
+        update_contacts(contacts, wf)
+        return "Contacts updated for "+name
+    return None
+
 def qnotify(title, text):
     log.debug("notifying..."+text)
     print(text)
@@ -38,6 +61,10 @@ def get_notify_name(wf, args):
         name = item['email'] if 'email' in item else (item['contact'] if 'contact' in item else 'item')
         name = ' '.join(map(lambda x: x.capitalize(), re.split('[\.\s\-\,]+', name)))
     return name
+
+def get_alias(wf, id):
+    aliases = wf.cached_data('alias', max_age=0)
+    return next((x for x in aliases if id == x['id']), None)
 
 def get_client(wf, client_mac):
     clients = wf.cached_data('client', max_age=0)
@@ -110,24 +137,34 @@ def get_contacts(wf, hub, aliases):
     """
     return hub.get_contacts(aliases)
 
+def call_function(func_name, *args):
+    # Attempt to fetch the function from local scope
+    func = locals().get(func_name)
+    if not func:
+        # Attempt to fetch from global scope
+        func = globals().get(func_name)
+    if func:
+        return func(*args)
+    return None
 
 def post_process(wf, hub, args, result):
     if not args.command_type or not args.id or not args.command:
         return 
     call = args.command_type+'_'+args.command
     
-
 def handle_commands(wf, hub, args):
     if not args.command_type or not args.id or not args.command:
         return 
     call = args.command_type+'_'+args.command
-    result = hub.call_dynamic(call, id=args.id)
-        
+    params = {"param": args.command_params} if args.command_params else {}
+    result = hub.call_dynamic(call, id=args.id, **params)
+    message = call_function(call, result, wf, args.id)
     log.debug("type of result is "+str(type(result))+" and result is "+str(result))
     notify_command = re.sub(r'^(fw|pf)', '', args.command)
     notify_command = re.sub(r'e$','',notify_command)
+    message = get_notify_name(wf, vars(args))+' '+notify_command+'ed ' if not message else message
     if not result or type(result) is not str:
-        qnotify("SimpleLogin", get_notify_name(wf, vars(args))+' '+notify_command+'ed ')
+        qnotify("SimpleLogin", message)
     else:
         qnotify("SimpleLogin", get_notify_name(wf, vars(args))+' '+notify_command+' error: '+result)        
     return result
@@ -161,11 +198,12 @@ def get_item_type(item):
         return 'contact'
     return 'alias'
 
-def post_process_item(wf, item):
+def post_process_item(wf, item, name=None):
     #log.debug("post processing "+str(item))
     item['_display_name'] = beautify(get_name(item))
     item['_type'] = get_item_type(item)
     item['_icon'] = get_item_icon(wf, item)
+    if name: item['alias'] = name
     return item
 
 def handle_update(wf, args, hub):

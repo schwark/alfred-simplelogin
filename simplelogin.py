@@ -62,7 +62,7 @@ class SimpleLogin(object):
                 'result': 'contacts',
                 'url': lambda sf, **kwargs: '/api/aliases/'+str(kwargs['id'] if 'id' in kwargs else '')+'/contacts?page_id='+str((kwargs['page'] if 'page' in kwargs else '0'))
             },
-            'alias-contact-new': {
+            'alias-contact_new': {
                 'method': 'POST',
                 'url': lambda sf, **kwargs: '/api/aliases/'+str(kwargs['id'] if 'id' in kwargs else '')+'/contacts',
                 'data': {
@@ -229,8 +229,8 @@ class SimpleLogin(object):
     def alias_toggle(self, id):
         return self._get_results('alias-toggle', id=id)
         
-    def alias_contact_new(self, id, contact):
-        return self._get_results('alias-contact-new', id=id, contact=contact)
+    def alias_contact_new(self, id, param):
+        return self._get_results('alias-contact_new', id=id, contact=param[0])
         
     def alias_upcontact(self, id):
         return self._get_results('alias-contacts', id=id)

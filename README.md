@@ -34,7 +34,7 @@ This should be needed once at the install, and everytime you want to refresh inf
 ## Alias Commands
 
 ```
-sl <alias-name> clip|toggle|enable|disable|delete
+sl <alias-name> clip|toggle|enable|disable|delete|update|contact <email address>
 ```
 
 * clip - copies the name to clipboard
@@ -42,6 +42,8 @@ sl <alias-name> clip|toggle|enable|disable|delete
 * enable - turns on irrespective of current state
 * disable - turns off irrespective of current state
 * delete - deletes the alias
+* update - updates the contacts for this alias
+* contact - create new contact for this alias with this email address - the reverse address will be saved to clipboard
 
 
 ## Contact Commands
